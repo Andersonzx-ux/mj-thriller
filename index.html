@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-world="noite">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#020701" id="meta-theme-color">
+    <title>Michael Jackson — Thriller</title>
+    <link rel="icon" type="image/jpeg" href="./assets/cover-256.jpg">
+    <link rel="preload" href="assets/fonts/marck-script-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/fonts/jost-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/cover.jpg" as="image">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Ambiente: a capa desfocada -->
+    <div class="ambient" aria-hidden="true"></div>
+    <!-- Refletor do topo da capa -->
+    <div class="spot" aria-hidden="true"></div>
+
+    <main class="app">
+        <nav class="topbar" aria-label="Seções">
+            <button id="btn-about" class="pill" type="button">Sobre</button>
+            <button id="btn-awards" class="pill" type="button">Premiações</button>
+            <button id="btn-credits" class="pill" type="button">Ficha técnica</button>
+            <button id="btn-world" class="pill world-btn" type="button" aria-live="polite" title="Alternar entre dia e noite">
+                <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg>
+                <span id="world-label">Dia</span>
+            </button>
+        </nav>
+
+        <div class="stage-row">
+            <header class="hero">
+                
+                <!-- A capa real; a assinatura escrita à mão nela é a barra de progresso -->
+                <div class="cover" id="cover">
+                    <div class="cover-art">
+                        <img src="assets/cover.jpg" alt="Capa: Michael Jackson, Thriller" decoding="async">
+                        <canvas class="road-canvas" id="road-canvas" aria-hidden="true"></canvas>
+                    </div>
+                    <div class="road-hit" id="road-hit" title="Toque nas letras da assinatura para buscar na faixa" aria-hidden="true"></div>
+                </div>
+                <h1 class="album-title" id="album-title"><span class="t-main" role="img" aria-label="Michael Jackson — Thriller"></span><span class="t-artist sr-only">Michael Jackson Thriller</span><span class="t-sub">O álbum mais vendido da história</span></h1>
+                <p class="meta" id="album-meta"></p>
+            </header>
+
+            <section class="player" aria-label="Player de áudio">
+                <div class="now-playing">
+                    <p class="now-kicker" id="current-kicker">Faixa</p>
+                    <h2 id="current-title">Selecione uma faixa</h2>
+                    <p id="current-composers" class="credit">--</p>
+                </div>
+
+                <div class="seek">
+                    <span id="time-current" class="time">00:00</span>
+                    <input type="range" id="progress-bar" min="0" max="100" step="0.1" value="0" aria-label="Progresso da faixa">
+                    <span id="time-total" class="time">00:00</span>
+                </div>
+
+                <div class="controls">
+                    <button id="btn-shuffle" class="control-btn" type="button" aria-label="Modo aleatório" title="Aleatório"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+                    <button id="btn-prev" class="control-btn" type="button" aria-label="Faixa anterior"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                    <button id="btn-play-pause" class="control-btn play-btn" type="button" aria-label="Tocar"></button>
+                    <button id="btn-next" class="control-btn" type="button" aria-label="Próxima faixa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                    <button id="btn-repeat" class="control-btn" type="button" aria-label="Repetir: desligado" title="Repetir"></button>
+                </div>
+
+                <div class="volume-control" title="Volume">
+                    <span class="volume-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></span>
+                    <input type="range" id="volume-bar" min="0" max="1" step="0.01" value="1" aria-label="Volume">
+                </div>
+
+                <audio id="audio-element" preload="none"></audio>
+            </section>
+        </div>
+
+        <!-- O vidro quadriculado da mesa (recorte real) e o lenço de onça da capa: a divisória entre o palco e as faixas -->
+        <div class="scene" aria-hidden="true">
+            <div class="scene-rule"><span class="scene-line"></span><span class="scene-leo"></span><span class="scene-line"></span></div>
+            <div class="scene-floor"></div>
+        </div>
+
+        <div class="content-split">
+            <section class="tracklist-section" aria-label="Faixas">
+                <ul id="tracklist" class="tracklist"></ul>
+            </section>
+
+            <section class="lyrics-section" id="lyrics-section" aria-label="Letra da música">
+                <div class="lyrics-header">
+                    <div class="lyrics-header-text">
+                        <h3 id="lyrics-title">Letra</h3>
+                        <p id="lyrics-composers" class="credit"></p>
+                    </div>
+                    <div class="lyrics-actions">
+                        <button id="btn-translation" class="lyrics-toggle-btn lyrics-tr-btn" type="button" aria-pressed="true" aria-label="Mostrar tradução" title="Esta faixa ainda não tem tradução">PT</button>
+                        <button id="btn-expand-lyrics" class="lyrics-toggle-btn" type="button" aria-pressed="false" aria-label="Letra em tela cheia" title="Tela cheia">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                        </button>
+                        <button id="btn-toggle-lyrics" class="lyrics-toggle-btn" type="button" aria-expanded="true" aria-controls="lyrics-content" aria-label="Esconder letra">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="lyrics-content" class="lyrics-content">
+                    <p class="empty-state">Selecione uma música para ver a letra.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <dialog id="modal-about" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" type="button" aria-label="Fechar">✕</button>
+            <h2>Sobre o álbum</h2>
+            <div id="about-content" class="modal-body"></div>
+        </div>
+    </dialog>
+
+    <dialog id="modal-awards" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" type="button" aria-label="Fechar">✕</button>
+            <h2>Premiações</h2>
+            <div id="awards-content" class="modal-body"></div>
+        </div>
+    </dialog>
+
+    <dialog id="modal-credits" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" type="button" aria-label="Fechar">✕</button>
+            <h2>Ficha técnica</h2>
+            <div id="credits-content" class="modal-body"></div>
+        </div>
+    </dialog>
+
+    <script src="data/album.js"></script>
+    <script src="js/road.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

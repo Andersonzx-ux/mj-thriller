@@ -1,0 +1,25 @@
+import sys, numpy as np, colorsys
+from PIL import Image
+a=np.asarray(Image.open(sys.argv[1]).convert('RGB')).astype(float)
+print(a.shape)
+hx=lambda c:'#%02x%02x%02x'%tuple(int(round(v)) for v in c)
+def reg(n,x0,y0,x1,y1):
+    r=a[y0:y1,x0:x1].reshape(-1,3); print(f'{n:14s} med {hx(np.median(r,0))}')
+reg('moldura',10,200,60,400); reg('moldura-b',10,610,100,630)
+reg('ceu',90,95,170,150); reg('ceu-escuro',90,160,130,200)
+reg('nuvem-clara',250,130,340,160); reg('nuvem-media',150,200,200,280); reg('nuvem-sombra',520,250,560,320)
+reg('terno',270,290,330,340); reg('terno-calca',320,380,370,430); reg('camisa-verm',330,200,370,230)
+reg('predios',150,380,200,420); reg('predio-lum',510,370,540,400)
+reg('xadrez-am',140,500,200,520); reg('xadrez-pr',200,540,260,560)
+reg('texto-branco',165,598,480,612)
+t=a[28:100,112:530].reshape(-1,3); m=(t[:,0]>120)&(t[:,1]<70)
+print('titulo vermelho',m.sum(),hx(np.median(t[m],0)), 'P90',hx(np.percentile(t[m],90,axis=0)))
+f=a.reshape(-1,3)[::9]; hsv=np.array([colorsys.rgb_to_hsv(*(p/255)) for p in f]); l=f@[.2126,.7152,.0722]
+def sel(n,m): print(n,int(m.sum()),hx(np.median(f[m],0)) if m.sum() else '-')
+sel('vermelho vivo',((hsv[:,0]<.03)|(hsv[:,0]>.97))&(hsv[:,1]>.7)&(hsv[:,2]>.6))
+sel('vermelho escuro',((hsv[:,0]<.03)|(hsv[:,0]>.97))&(hsv[:,1]>.7)&(hsv[:,2]>.25)&(hsv[:,2]<.5))
+sel('dourado claro',(hsv[:,0]>.1)&(hsv[:,0]<.15)&(hsv[:,1]>.45)&(hsv[:,2]>.85))
+sel('dourado medio',(hsv[:,0]>.08)&(hsv[:,0]<.14)&(hsv[:,1]>.5)&(hsv[:,2]>.55)&(hsv[:,2]<.8))
+sel('laranja',(hsv[:,0]>.04)&(hsv[:,0]<.08)&(hsv[:,1]>.6)&(hsv[:,2]>.6))
+sel('azul noite',(hsv[:,0]>.55)&(hsv[:,0]<.68)&(hsv[:,1]>.4)&(hsv[:,2]>.2))
+sel('marrom',(hsv[:,0]>.05)&(hsv[:,0]<.1)&(hsv[:,1]>.5)&(hsv[:,2]>.2)&(hsv[:,2]<.45))
